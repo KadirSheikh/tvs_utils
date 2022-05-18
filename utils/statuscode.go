@@ -48,7 +48,7 @@ func Created(d int) Status_code {
 	return Status_code{Code: 201, Message: "Successfully added!"}
 }
 
-func NotFound() Status_code {
+func NotFound(d int) Status_code {
 	return Status_code{Code: 404, Message: "Id not found!"}
 }
 
@@ -62,4 +62,12 @@ func Deleted() Status_code {
 
 func Unauthorized() Status_code {
 	return Status_code{Code: 401, Message: "You do not have permission to make this request!"}
+}
+
+func ViolationFound(d int) Status_code {
+	if d == 0 {
+
+		return Status_code{Code: 404, Message: "Registration Number not found!"}
+	}
+	return Status_code{Code: 404, Message: "Violation id not found!"}
 }
