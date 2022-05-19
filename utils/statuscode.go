@@ -6,21 +6,20 @@ type Status_code struct {
 }
 
 func BadRequest() Status_code {
-	return Status_code{Code: 500, Message: "Failed to process request.Please try again!"}
+	return Status_code{Code: 400, Message: "Failed to process request.Please try again!"}
 }
 
 func OK(d int) Status_code {
 	if d == 0 {
 		return Status_code{Code: 200, Message: "Login Successful!"}
 	} else if d == 1 {
-
-		return Status_code{Code: 200, Message: "OK!"}
+		return Status_code{Code: 200, Message: "Updated Successfully!"}
+	} else if d == 2 {
+		return Status_code{Code: 200, Message: "Deleted Successfully!"}
+	} else if d == 3 {
+		return Status_code{Code: 200, Message: "Password Reset Successfully!"}
 	}
 	return Status_code{Code: 200, Message: "OK!"}
-}
-
-func InvalidCreds() Status_code {
-	return Status_code{Code: 401, Message: "Please check again your credential!"}
 }
 
 func Conflict(d int) Status_code {
@@ -35,33 +34,43 @@ func Conflict(d int) Status_code {
 	return Status_code{Code: 409, Message: "Conflict!"}
 }
 
-func Failed() Status_code {
-	return Status_code{Code: 400, Message: "Failed.Please try again!"}
-}
-
 func Created(d int) Status_code {
 	if d == 0 {
 		return Status_code{Code: 201, Message: "Registration Successful!"}
 	} else if d == 1 {
 		return Status_code{Code: 201, Message: "Vehicle added Successful!"}
+	} else if d == 2 {
+		return Status_code{Code: 201, Message: "Address added Successful!"}
 	}
 	return Status_code{Code: 201, Message: "Successfully added!"}
 }
 
 func NotFound(d int) Status_code {
-	return Status_code{Code: 404, Message: "Id not found!"}
+	if d == 0 {
+		return Status_code{Code: 404, Message: "Login Id not found!"}
+	} else if d == 1 {
+		return Status_code{Code: 404, Message: "No user found!"}
+	} else if d == 2 {
+		return Status_code{Code: 404, Message: "Vehicle registration number found!"}
+	} else if d == 3 {
+		return Status_code{Code: 404, Message: "No token found!"}
+	} else if d == 4 {
+		return Status_code{Code: 404, Message: "No Address found!"}
+	} else if d == 5 {
+		return Status_code{Code: 404, Message: "No Vehicle found!"}
+	} else if d == 6 {
+		return Status_code{Code: 404, Message: "Role Id not found!"}
+	} else if d == 7 {
+		return Status_code{Code: 404, Message: "User Id not found!"}
+	}
+	return Status_code{Code: 404, Message: "Not found!"}
 }
 
-func Updated() Status_code {
-	return Status_code{Code: 204, Message: "Updated Successfully!"}
-}
-
-func Deleted() Status_code {
-	return Status_code{Code: 204, Message: "Deleted Successfully!"}
-}
-
-func Unauthorized() Status_code {
-	return Status_code{Code: 401, Message: "You do not have permission to make this request!"}
+func Unauthorized(d int) Status_code {
+	if d == 0 {
+		return Status_code{Code: 401, Message: "You do not have permission to make this request!"}
+	}
+	return Status_code{Code: 401, Message: "Please check again your credential!"}
 }
 
 func ViolationFound(d int) Status_code {
