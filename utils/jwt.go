@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"time"
 
@@ -8,14 +10,22 @@ import (
 )
 
 type JWT interface {
+	GenerateServiceValidationToken(chasisno, vehicleregno string) string
 	GenerateToken(Userid uint64, Loginid string, Roleid uint64) string
 	ValidateToken(token string) (*jwt.Token, error)
+	VerifyToken(token string) (*Payload, error)
 }
 
 type jwtCustomClaim struct {
 	Userid  uint64 `json:"userid"`
 	Loginid string `json:"loginid"`
 	Roleid  uint64 `json:"roleid"`
+	jwt.StandardClaims
+}
+
+type Payload struct {
+	ChasisNumber string `json:"chasisno"`
+	Vehicleregno string `json:"vehicleregno"`
 	jwt.StandardClaims
 }
 
@@ -33,7 +43,7 @@ func NewJWTService() JWT {
 
 func getSecretKey() string {
 	conf := NewConfig()
-	secretKey := conf.Database.Secret
+	secretKey := conf.AuthInfo.Secretkey
 
 	if secretKey != "" {
 		secretKey = "trafficviolationsystemjwt"
@@ -48,13 +58,34 @@ func (j *jwtToken) GenerateToken(Userid uint64, Loginid string, Roleid uint64) s
 		Loginid,
 		Roleid,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().AddDate(1, 0, 0).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * 45).Unix(),
 			Issuer:    j.issuer,
 			IssuedAt:  time.Now().Unix(),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	t, err := token.SignedString([]byte(j.secretKey))
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+func (j *jwtToken) GenerateServiceValidationToken(chasisno, vehicleregno string) string {
+
+	claims := &Payload{
+		chasisno,
+		vehicleregno,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Minute * 45).Unix(),
+			Issuer:    j.issuer,
+			IssuedAt:  time.Now().Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	t, err := token.SignedString([]byte(j.secretKey))
+
 	if err != nil {
 		panic(err)
 	}
@@ -68,4 +99,29 @@ func (j *jwtToken) ValidateToken(token string) (*jwt.Token, error) {
 		}
 		return []byte(j.secretKey), nil
 	})
+}
+
+func (j *jwtToken) VerifyToken(token string) (*Payload, error) {
+	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			fmt.Println("Algo used ", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method %s", token.Header["alg"])
+		}
+
+		str, _ := base64.StdEncoding.DecodeString(j.secretKey)
+		return str, nil
+	})
+
+	fmt.Println("verify Error : ", err, err.(*jwt.ValidationError))
+
+	payload, ok := jwtToken.Claims.(*Payload)
+	if !ok {
+		return nil, errors.New("token is invalid, could not parse claims")
+	}
+
+	if payload.ExpiresAt < time.Now().Local().Unix() {
+		return nil, errors.New("token is expired")
+	}
+
+	return payload, nil
 }
