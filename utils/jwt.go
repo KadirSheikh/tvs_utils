@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -43,7 +44,7 @@ func NewJWTService() JWT {
 
 func getSecretKey() string {
 	conf := NewConfig()
-	secretKey := conf.AuthInfo.Secretkey
+	secretKey := conf.Database.Secret
 
 	if secretKey != "" {
 		secretKey = "trafficviolationsystemjwt"
@@ -77,7 +78,7 @@ func (j *jwtToken) GenerateServiceValidationToken(chasisno, vehicleregno string)
 		chasisno,
 		vehicleregno,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 45).Unix(),
+			ExpiresAt: time.Now().AddDate(0, 0, 1).Unix(),
 			Issuer:    j.issuer,
 			IssuedAt:  time.Now().Unix(),
 		},
@@ -89,6 +90,7 @@ func (j *jwtToken) GenerateServiceValidationToken(chasisno, vehicleregno string)
 	if err != nil {
 		panic(err)
 	}
+	log.Print(t)
 	return t
 }
 

@@ -8,10 +8,9 @@ import (
 )
 
 type Config struct {
-	Database database             `toml:"database"`
-	Server   server               `toml:"server"`
-	Comm     servicecommunication `toml:"servicecommunication"`
-	AuthInfo authkey              `toml:"authkey"`
+	Database database
+	Server   server
+	Comm     servicecommunication
 }
 
 type database struct {
@@ -19,6 +18,7 @@ type database struct {
 	Database string
 	User     string
 	Password string
+	Secret   string
 }
 
 type server struct {
@@ -27,10 +27,6 @@ type server struct {
 
 type servicecommunication struct {
 	Port string
-}
-
-type authkey struct {
-	Secretkey string
 }
 
 var conf *Config
@@ -42,12 +38,13 @@ func NewConfig() *Config {
 		defer lock.Unlock()
 
 		if conf == nil {
-			if _, err := toml.DecodeFile("./config.toml", &conf); err != nil {
 
-				panic("Could not able to read configuration")
+			if _, err := toml.DecodeFile("./config.toml", &conf); err != nil {
+				fmt.Println(err)
 			}
 
 			fmt.Printf("%#v\n", conf)
+
 			return conf
 		} else {
 			return conf
@@ -56,12 +53,3 @@ func NewConfig() *Config {
 
 	return conf
 }
-
-// func NewConfig() *Config {
-// 	var conf Config
-// 	if _, err := toml.DecodeFile("./config.toml", &conf); err != nil {
-// 		fmt.Println(err)
-// 	}
-
-// 	return &conf
-// }
