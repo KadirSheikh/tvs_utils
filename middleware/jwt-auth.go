@@ -14,6 +14,10 @@ import (
 const (
 	AuthorizationHeaderKey  = "authorization"
 	AuthorizationPayloadKey = "authorization_payload"
+
+	Loginid = "loginid"
+	Roleid  = "roleid"
+	Userid  = "userid"
 )
 
 func AuthorizeJWT(jwtService utils.JWT) gin.HandlerFunc {
@@ -28,7 +32,10 @@ func AuthorizeJWT(jwtService utils.JWT) gin.HandlerFunc {
 		token, err := jwtService.ValidateToken(authHeader)
 		if token.Valid {
 			claims := token.Claims.(jwt.MapClaims)
-			log.Println("Claim[userid]: ", claims["userid"])
+			c.Set(Loginid, claims["loginid"])
+			c.Set(Roleid, claims["roleid"])
+			c.Set(Userid, claims["userid"])
+			c.Next()
 		} else {
 			log.Println(err)
 			res := utils.BadRequest()

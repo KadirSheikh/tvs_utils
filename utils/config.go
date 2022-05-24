@@ -10,7 +10,6 @@ import (
 type Config struct {
 	Database database
 	Server   server
-	Comm     servicecommunication
 }
 
 type database struct {
@@ -22,10 +21,6 @@ type database struct {
 }
 
 type server struct {
-	Port string
-}
-
-type servicecommunication struct {
 	Port string
 }
 
