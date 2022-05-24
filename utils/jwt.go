@@ -78,7 +78,7 @@ func (j *jwtToken) GenerateServiceValidationToken(chasisno, vehicleregno string)
 		chasisno,
 		vehicleregno,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().AddDate(0, 0, 1).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * 45).Unix(),
 			Issuer:    j.issuer,
 			IssuedAt:  time.Now().Unix(),
 		},

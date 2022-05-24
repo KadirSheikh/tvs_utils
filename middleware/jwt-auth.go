@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/KadirSheikh/tvs_utils/utils"
 
@@ -41,27 +40,8 @@ func AuthorizeJWT(jwtService utils.JWT) gin.HandlerFunc {
 
 func AuthMiddleware(s utils.JWT) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		fmt.Println("Inside auth middleware")
-		authorizationHeader := ctx.GetHeader(AuthorizationHeaderKey)
-
-		log.Println("Inside auth middleware", authorizationHeader)
-
-		if len(authorizationHeader) == 0 {
-			utils.BuildRes(utils.ErrInvalidAuthorizeHeader, "Error", nil, nil, ctx)
-			fmt.Println("Error 1 ", utils.ErrInvalidAuthorizeHeader)
-			return
-		}
-
-		fields := strings.Fields(authorizationHeader)
-		log.Println("Fields ", fields)
-		if len(fields) < 2 {
-			utils.BuildRes(utils.ErrInvalidAuthorizeHeaderFmt, "Error", nil, fmt.Errorf("expected fields not present in header"), ctx)
-			fmt.Println("Error 2 ", utils.ErrInvalidAuthorizeHeaderFmt, fields)
-			return
-		}
-
-		accessToken := fields[1]
-		payload, err := s.VerifyToken(accessToken)
+		authHeader := ctx.GetHeader("Authorization")
+		payload, err := s.VerifyToken(authHeader)
 		if err != nil {
 			fmt.Println("Verify token error ", err, payload)
 			utils.BuildRes(utils.ErrInvalidAccessToken, "Error", nil, err, ctx)
